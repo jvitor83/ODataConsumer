@@ -46,12 +46,15 @@ export class InterceptedHttp extends Http {
     }
 
     if (!options.headers.has('Content-Type')) {
-      options.headers.append('Content-Type', 'application/json');
+      //options.headers.append('Content-Type', 'application/json');
     }
 
     if (this.authService && this.authService.auth.value.isAuthenticated) {
       options.headers.append('Authorization', 'Bearer ' + this.authService.auth.value.identity.token);
     }
+
+//"x-cdata-authtoken: MY_AUTH_TOKEN"
+    //options.headers.append('x-cdata-authtoken', '8c8P2t8j6N4g8y5W9x2z');
 
     return options;
   }

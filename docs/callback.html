@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>oidc-client test</title>
+</head>
+
+<body>
+    <div>
+        <!--<a href="/">back to sample</a>-->
+    </div>
+    <pre id='out'></pre>
+    <script src='scripts/oidc-client.min.js'></script>
+    <script>
+        var authConf = null;
+        try {
+            var authConfSerialized = localStorage.getItem(location.host + ':environment.authentication');
+            if (authConfSerialized) {
+                authConf = JSON.parse(authConfSerialized);
+            }
+        } catch (err) { console.error(err); }
+        //Oidc.Log.logger = console;
+        //Oidc.Log.logLevel = Oidc.Log.INFO;
+        var mgr = null;
+        if (authConf) {
+            mgr = new Oidc.UserManager(authConf);
+        } else {
+            mgr = new Oidc.UserManager();
+        }
+        mgr.signinRedirectCallback().then(function (user) {
+            console.log("signin response success", user);
+            var appUri = localStorage.getItem(location.host + ':callback');
+            if (appUri) {
+                location.assign(appUri);
+            } else {
+                location.assign('./');
+            }
+        }).catch(function (err) {
+            console.log("error");
+            console.log(err);
+            //log(err);
+            //alert('ERROR: '+ err);
+            location.assign('./');
+        });
+    </script>
+</body>
+
+</html>

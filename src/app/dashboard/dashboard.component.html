@@ -1,3 +1,10 @@
 <div #content>
-  Hello World!
+  <div>
+    <input type="text" [(ngModel)]="url" (ngModelChange)="onUrlChange($event)" width="400" value="http://localhost:7276/api/odata/" />
+    <select [(ngModel)]="tableName" >
+      <option *ngFor="let table of tables" [ngValue]="table">{{table}}</option>
+    </select>
+  </div>
+  <seed-grid [tableName]="tableName" [url]="url" >
+  </seed-grid>
 </div>

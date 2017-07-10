@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>user-manager test</title>
+    <link rel='stylesheet' href='app.css'>
+</head>
+
+<body>
+    <script src='scripts/oidc-client.min.js'></script>
+    <script>
+        var authConf = null;
+        try {
+            var authConfSerialized = localStorage.getItem(location.host + ':environment.authentication');
+            if (authConfSerialized) {
+                authConf = JSON.parse(authConfSerialized);
+            }
+        } catch (err) { console.error(err); }
+        //Oidc.Log.logger = console;
+        //Oidc.Log.logLevel = Oidc.Log.INFO;
+        var mgr = null;
+        if (authConf) {
+            mgr = new Oidc.UserManager(authConf);
+        }else{
+            mgr = new Oidc.UserManager();
+        }
+        mgr.signinSilentCallback();
+    </script>
+</body>
+
+</html>

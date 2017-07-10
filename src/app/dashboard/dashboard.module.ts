@@ -1,3 +1,6 @@
+import { FormsModule } from '@angular/forms';
+import { GridModule } from '@progress/kendo-angular-grid';
+import { GridComponent } from './../grid/grid.component';
 import { LayoutModule } from './../layout/layout.module';
 import { CommonModule } from '@angular/common';
 import { NgModule }                 from '@angular/core';
@@ -15,8 +18,10 @@ import { IonicModule } from 'ionic-angular';
         DashboardRoutingModule,
         //IonicModule,
         ChartsModule,
-        LayoutModule
+        LayoutModule,
+        GridModule,
+        FormsModule
     ],
-    declarations: [ DashboardComponent ]
+    declarations: [ DashboardComponent, GridComponent ]
 })
 export class DashboardModule { }

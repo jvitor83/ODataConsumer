@@ -1,12 +1,12 @@
 {
-  "name": "angular-pwa-seed",
+  "name": "ODataConsumer",
   "version": "0.1.0",
   "license": "MIT",
   "angular-cli": {},
   "config": {
-    "name": "AngularPwaSeed",
-    "shortname": "AngularPwaSeed",
-    "color": "#0f3a54"
+    "name": "ODataConsumer",
+    "shortname": "ODataConsumer",
+    "color": "#ffa700"
   },
   "scripts": {
     "start": "npm run ng -- serve --port 5555",
@@ -41,7 +41,8 @@
     "prepublish.prod": "npm run resources",
     "publish.prod": "npm run build.prod",
     "prepublish.prod.exp": "npm run resources",
-    "publish.prod.exp": "npm run resources && npm run build.prod.exp",
+    "publish.prod.exp": "npm run build.prod.exp",
+    "github.docs": "./node_modules/.bin/cpx \"www/**/*\" docs",
     "preinstall": "npm rebuild node-sass",
     "postinstall": "npm run concurrently -- \"echo 1\" \"npm run cordova.prepare\" -s first",
     "cordova.prepare": "npm run cordova -- prepare --verbose",
@@ -103,6 +104,16 @@
     "@ionic-native/splash-screen": "^3.4.4",
     "@ionic-native/status-bar": "^3.4.4",
     "@ionic/storage": "2.0.1",
+    "@progress/kendo-angular-dateinputs": "^1.0.5",
+    "@progress/kendo-angular-dropdowns": "^1.1.1",
+    "@progress/kendo-angular-excel-export": "^1.0.3",
+    "@progress/kendo-angular-grid": "^1.2.2",
+    "@progress/kendo-angular-inputs": "^1.0.6",
+    "@progress/kendo-angular-intl": "^1.2.1",
+    "@progress/kendo-angular-l10n": "^1.0.2",
+    "@progress/kendo-data-query": "^1.0.5",
+    "@progress/kendo-drawing": "^1.1.1",
+    "@progress/kendo-theme-default": "^2.38.0",
     "angularfire2": "^4.0.0-rc.1",
     "bootstrap": "^3.3.7",
     "browser-sync": "2.17.5",

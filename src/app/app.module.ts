@@ -1,3 +1,4 @@
+import { ODataService } from './odata.service';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -13,6 +14,8 @@ import { MyApp } from './app.component';
 
 import { Ng2BootstrapModule } from 'ngx-bootstrap';
 import { ChartsModule } from 'ng2-charts';
+import { GridModule } from '@progress/kendo-angular-grid';
+
 
 import { environment } from '../environments/environment';
 
@@ -34,6 +37,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { MenuItemComponent } from './shared/components/menu-item/menu-item.component';
 import { AUTH_SERVICE } from "app/shared/services/base-auth.service";
 import { httpFactory } from "app/shared/services/intercepted-http.service";
+import { GridComponent } from './grid/grid.component';
 
 
 @NgModule({
@@ -57,6 +61,7 @@ import { httpFactory } from "app/shared/services/intercepted-http.service";
     // AngularFireDatabaseModule, //Keep this if you use Firebase, otherwise comment/remove it
     // AngularFireAuthModule, //Keep this if you use Firebase, otherwise comment/remove it
 
+    GridModule,
     LayoutModule
   ],
   bootstrap: [IonicApp],
@@ -86,7 +91,8 @@ import { httpFactory } from "app/shared/services/intercepted-http.service";
       deps: [XHRBackend, RequestOptions, AUTH_SERVICE]
     },
 
-    AuthGuardService
+    AuthGuardService,
+    ODataService
   ]
 })
 export class AppModule { }
