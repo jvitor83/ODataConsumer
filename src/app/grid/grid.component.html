@@ -1,0 +1,50 @@
+<kendo-grid [data]="view | async" [height]="600" [scrollable]="'scrollable'" [selectable]="true"
+        [pageSize]="pageSize"
+        [skip]="skip"
+        (pageChange)="pageChange($event)"
+          [sortable]="{
+            allowUnsort: true,
+            mode: 'multiple'
+            }"
+          [sort]="sort"
+          (sortChange)="sortChange($event)"
+        [pageable]="true"
+        [filter]="filter"
+        [filterable]="true"
+        (filterChange)="filterChange($event)"
+              [groupable]="true"
+              [group]="groups"
+              (groupChange)="groupChange($event)"
+>
+  <ng-template kendoGridToolbarTemplate>
+    <input type="text" [(ngModel)]="pageSize" (ngModelChange)='changed($event)' />
+    <button type="button" kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
+    <button type="button" kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
+    <button type="button" (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
+  </ng-template>
+
+<ng-template ngFor [ngForOf]="columns" let-column>
+            <kendo-grid-column
+              field="{{column.field}}"
+              [width]="150"
+              editor="{{column.editor}}"
+              filter="{{column.filter}}"
+              [hidden]="hiddenColumns.indexOf(column.name) > -1"
+            >
+              <ng-template kendoGridHeaderTemplate let-dataItem>
+                  {{dataItem.field}}
+                  <button
+                    (click)="hideColumn(dataItem.field)"
+                    class="k-button k-primary"
+                    style="float: right;"
+                  >
+                    Hide
+                  </button>
+              </ng-template>
+            </kendo-grid-column>
+          </ng-template>
+
+  <!--<div *kendoGridDetailTemplate="let dataItem">
+    <ng-content></ng-content>
+  </div>-->
+</kendo-grid>
