@@ -41,6 +41,8 @@ export class DashboardComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.url = "https://services.odata.org/TripPinRESTierService/(S(3mslpb2bc0k5ufk24olpghzx))/";
+        this.onUrlChange(this.url);
         console.debug('DashboardComponent ngOnInit');
     }
 }

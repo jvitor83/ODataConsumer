@@ -17,7 +17,10 @@
               (groupChange)="groupChange($event)"
 >
   <ng-template kendoGridToolbarTemplate>
-    <input type="text" [(ngModel)]="pageSize" (ngModelChange)='changed($event)' />
+    <div>
+      <label for="inputPageSize">Page Size:</label>
+      <input type="text" name="inputPageSize" width="30" [(ngModel)]="pageSize" />
+    </div>
     <button type="button" kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
     <button type="button" kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
     <button type="button" (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>

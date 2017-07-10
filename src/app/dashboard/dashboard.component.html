@@ -1,10 +1,16 @@
 <div #content>
   <div>
-    <input type="text" [(ngModel)]="url" (ngModelChange)="onUrlChange($event)" width="400" value="http://localhost:7276/api/odata/" />
-    <select [(ngModel)]="tableName" >
+    <div>
+      <label for="inputUrl">OData URL:</label>
+      <input name="inputUrl" type="text" [(ngModel)]="url" (ngModelChange)="onUrlChange($event)" width="400" value="http://localhost:7276/api/odata/" />
+
+      <label for="inputUrl">Entities:</label>
+      <select (ngModelChange)="grid.refresh()" [(ngModel)]="tableName">
       <option *ngFor="let table of tables" [ngValue]="table">{{table}}</option>
     </select>
-  </div>
-  <seed-grid [tableName]="tableName" [url]="url" >
-  </seed-grid>
-</div>
+      <div>
+
+      </div>
+      <seed-grid #grid [tableName]="tableName" [url]="url">
+      </seed-grid>
+    </div>
