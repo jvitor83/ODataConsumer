@@ -114,7 +114,7 @@ export class DashboardComponent implements OnInit {
 
 
                         let item: { name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
-                            name: entityTypeName,
+                            name: name,
                             columns: colunas
                         };
 
