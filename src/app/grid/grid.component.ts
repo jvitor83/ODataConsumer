@@ -2,17 +2,18 @@ import { state } from '@angular/animations';
 import { Http } from '@angular/http';
 import { ODataService } from './../odata.service';
 import { Observable } from 'rxjs/Observable';
-import { Component, OnInit, ViewChild, Input } from '@angular/core';
-import { GridDataResult, PageChangeEvent } from "@progress/kendo-angular-grid";
+import { Component, OnInit, ViewChild, Input, QueryList } from '@angular/core';
+import { GridDataResult, PageChangeEvent, GridComponent } from "@progress/kendo-angular-grid";
 import { SortDescriptor, State, FilterDescriptor, GroupDescriptor, CompositeFilterDescriptor } from "@progress/kendo-data-query";
 import { Subject } from "rxjs/Subject";
+import { ColumnBase } from "@progress/kendo-angular-grid/dist/es/column-base";
 
 @Component({
   selector: 'seed-grid',
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss']
 })
-export class GridComponent implements OnInit {
+export class GridODataComponent implements OnInit {
 
   @ViewChild(GridComponent) grid: GridComponent;
 
@@ -21,7 +22,7 @@ export class GridComponent implements OnInit {
   @Input() url: string;
   @Input() tableName: string;
 
-
+  metadata: { name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] };
 
   sort: SortDescriptor[] = [];
   @Input() pageSize: number = 10;
@@ -55,33 +56,58 @@ export class GridComponent implements OnInit {
     this.view.subscribe(r => {
       if (r) {
         const data = r.data;
-        //{ field: key, header: key, hidden: key == "id" }
-        this.columns = Object.keys(data[0]).map(key => {
 
-          //Maybe should check the metadata
-          let editor: 'text' | 'numeric' | 'date' | 'boolean' = 'text';
-          const reg = data[0];
-          const valor = reg[key];
-          const valorIsBoolean = (typeof valor) == 'boolean';
-          const valorIsNumber = (typeof valor) == 'number';
+        // if (this.grid) {
+        //   this.grid.columns = new QueryList<ColumnBase>();
+        // }
 
-          if (valorIsBoolean) {
-            editor = 'boolean';
-          } else if (valorIsNumber) {
-            editor = 'numeric';
-          } else {
-            try {
-              const valorDateTime = Date.parse(valor);
-              if ((typeof valorDateTime) == 'number') {
-                editor = 'date';
-              }
-            } catch (err) { }
-          }
+        const columnsInferid = Object.keys(data[0]);
+        const predicate = columnsInferid.filter(r => r.startsWith('@odata.id'));
+        const hasODataId = predicate && predicate.length > 0;
 
-          return {
-            field: key, header: key, editor: editor, filter: editor
-          }
-        });
+        if (this.metadata && hasODataId == false) {
+          //Create the columns by the metadata object generated
+          this.columns = this.metadata.columns.map(c => {
+            const key = c.name;
+            const editor = c.type;
+            return {
+              field: key, header: key, editor: editor, filter: editor, title: key
+            }
+          });
+        } else {
+          //Create the columns by infering the result
+          const filtered = Object.keys(data[0]).filter(r => !(r.indexOf('@odata') != -1));
+          this.columns = filtered.map(key => {
+
+            //Maybe should check the metadata
+            let editor: 'text' | 'numeric' | 'date' | 'boolean' = 'text';
+            const reg = data[0];
+            const valor = reg[key];
+            const valorIsBoolean = (typeof valor) == 'boolean';
+            const valorIsNumber = (typeof valor) == 'number';
+
+            if (valor == null) {
+              editor = 'text'; //revisit
+            } else if (valorIsBoolean) {
+              editor = 'boolean';
+            } else if (valorIsNumber) {
+              editor = 'numeric';
+            } else {
+              try {
+                const valorDateTime = Date.parse(valor);
+                if ((typeof valorDateTime) == 'number') {
+                  editor = 'date';
+                }
+              } catch (err) { }
+            }
+
+            return {
+              field: key, header: key, editor: editor, filter: editor, title: key
+            }
+          });
+        }
+
+        this.grid.columns.reset(this.columns);
       }
     });
     //this.view = new ODataService(this.http, this.url, this.tableName);
@@ -120,7 +146,10 @@ export class GridComponent implements OnInit {
       };
     }
 
-    this.service.query(stateToQuery, this.url, this.tableName);
+    if ((!!this.url) && (!!this.tableName)) {
+      this.service.query(stateToQuery, this.url, this.tableName);
+    }
+
   }
 
   public refresh() {
@@ -134,11 +163,13 @@ export class GridComponent implements OnInit {
 
 
   //
-  public columns: {
-    field: string, header: string, editor: string, filter: string
-  }[] = [
 
-  ];
+  public columns: Array<any> = new Array<any>();
+  // public columns: {
+  //   field: string, header: string, editor: string, filter: string
+  // }[] = [
+
+  // ];
 
   public hiddenColumns: string[] = [];
 

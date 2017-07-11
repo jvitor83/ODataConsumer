@@ -37,7 +37,6 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { MenuItemComponent } from './shared/components/menu-item/menu-item.component';
 import { AUTH_SERVICE } from "app/shared/services/base-auth.service";
 import { httpFactory } from "app/shared/services/intercepted-http.service";
-import { GridComponent } from './grid/grid.component';
 
 
 @NgModule({

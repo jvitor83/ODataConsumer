@@ -1,16 +1,20 @@
 <div #content>
   <div>
-    <div>
-      <label for="inputUrl">OData URL:</label>
-      <input name="inputUrl" type="text" [(ngModel)]="url" (ngModelChange)="onUrlChange($event)" width="400" value="http://localhost:7276/api/odata/" />
+    <ion-list>
+      <ion-item>
+        <ion-label for="inputUrl">OData URL:</ion-label>
+        <ion-input name="inputUrl" type="text" [(ngModel)]="url" (ngModelChange)="onUrlChange($event)" width="400"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label for="selectTable">Entities:</ion-label>
+        <ion-select [interface]="'popover'" name="selectTable" (ngModelChange)="updateGrid($event)" [(ngModel)]="tableName">
+          <ion-option *ngFor="let table of tables" [value]="table">{{table}}</ion-option>
+        </ion-select>
+      </ion-item>
 
-      <label for="inputUrl">Entities:</label>
-      <select (ngModelChange)="grid.refresh()" [(ngModel)]="tableName">
-      <option *ngFor="let table of tables" [ngValue]="table">{{table}}</option>
-    </select>
-      <div>
 
-      </div>
       <seed-grid #grid [tableName]="tableName" [url]="url">
       </seed-grid>
-    </div>
+    </ion-list>
+  </div>
+</div>
