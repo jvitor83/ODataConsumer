@@ -8,7 +8,7 @@
             }"
           [sort]="sort"
           (sortChange)="sortChange($event)"
-        [pageable]="true"
+        [pageable]="paginate"
         [filter]="filter"
         [filterable]="true"
         (filterChange)="filterChange($event)"
@@ -17,16 +17,24 @@
               (groupChange)="groupChange($event)"
 >
   <ng-template kendoGridToolbarTemplate>
-    <ion-item>
-      <ion-checkbox [(ngModel)]="paginate"></ion-checkbox>
-      <ion-label for="inputPageSize">Page Size:</ion-label>
-      <ion-input type="text" name="inputPageSize" [(ngModel)]="pageSize"></ion-input>
-    </ion-item>
-    <ion-item>
-    <button ion-button kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
-    <button ion-button kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
-    <button ion-button (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
-    </ion-item>
+    <ion-grid>
+      <ion-row>
+        <ion-col col-auto>
+          <ion-item>
+            <ion-checkbox [(ngModel)]="paginate"></ion-checkbox>
+            <ion-label for="inputPageSize">Page Size:</ion-label>
+            <ion-input class="pageSizeInput" type="number" name="inputPageSize" [(ngModel)]="pageSize"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item class="item-label-nomargin">
+            <button ion-button kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
+            <button ion-button kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
+            <button ion-button (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ng-template>
 
   <ng-template ngFor [ngForOf]="columns" let-column>

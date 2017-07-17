@@ -32,7 +32,7 @@ export class GridODataComponent implements OnInit {
   groups: GroupDescriptor[] = [];
 
 
-  paginate: boolean;
+  paginate: boolean = true;
 
   @ViewChildren(Select, { read: ViewContainerRef }) selects: QueryList<Select>;
 

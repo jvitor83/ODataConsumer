@@ -28,6 +28,10 @@ ion-menu ion-content {
   font-size: 16px;
 }
 
+.item-label-nomargin .label {
+  margin: 0px 0px 0px 0px !important;
+}
+
 /*
 @media all and (max-width: 768px) {
    [mobile-hidden] {
