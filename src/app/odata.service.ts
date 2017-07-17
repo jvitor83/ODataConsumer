@@ -72,7 +72,7 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
     }
 
 
-    if((<any>state).select) {
+    if((<any>state).select && (!hasGroups)) {
       let selectColumns = "";
       const selects: Array<string> = (<any>state).select;
       selects.forEach(col => {
