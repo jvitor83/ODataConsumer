@@ -2,11 +2,12 @@ import { state } from '@angular/animations';
 import { Http } from '@angular/http';
 import { ODataService } from './../odata.service';
 import { Observable } from 'rxjs/Observable';
-import { Component, OnInit, ViewChild, Input, QueryList } from '@angular/core';
-import { GridDataResult, PageChangeEvent, GridComponent } from "@progress/kendo-angular-grid";
-import { SortDescriptor, State, FilterDescriptor, GroupDescriptor, CompositeFilterDescriptor } from "@progress/kendo-data-query";
+import { Component, OnInit, ViewChild, Input, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
+import { GridDataResult, PageChangeEvent, GridComponent, FooterTemplateDirective } from "@progress/kendo-angular-grid";
+import { SortDescriptor, State, FilterDescriptor, GroupDescriptor, CompositeFilterDescriptor, AggregateDescriptor } from "@progress/kendo-data-query";
+import { Select } from 'ionic-angular';
 import { Subject } from "rxjs/Subject";
-import { ColumnBase } from "@progress/kendo-angular-grid/dist/es/column-base";
+
 
 @Component({
   selector: 'seed-grid',
@@ -22,7 +23,7 @@ export class GridODataComponent implements OnInit {
   @Input() url: string;
   @Input() tableName: string;
 
-  metadata: { name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] };
+  metadata: { version: number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] };
 
   sort: SortDescriptor[] = [];
   @Input() pageSize: number = 10;
@@ -31,12 +32,17 @@ export class GridODataComponent implements OnInit {
   groups: GroupDescriptor[] = [];
 
 
+  paginate: boolean;
+
+  @ViewChildren(Select, { read: ViewContainerRef }) selects: QueryList<Select>;
+
   constructor(private http: Http, private service: ODataService) {
 
     //const url = "http://localhost:8153/api.rsc";
     //"dbo_Usuario"
 
   }
+
 
   ngOnInit() {
     this.view = this.service;
@@ -94,8 +100,8 @@ export class GridODataComponent implements OnInit {
               editor = 'numeric';
             } else {
               try {
-                const valorDateTime = Date.parse(valor);
-                if ((typeof valorDateTime) == 'number') {
+                const valorDateTime = new Date(valor);
+                if (!isNaN(valorDateTime.getDate())) {
                   editor = 'date';
                 }
               } catch (err) { }
@@ -108,6 +114,8 @@ export class GridODataComponent implements OnInit {
         }
 
         this.grid.columns.reset(this.columns);
+
+
       }
     });
     //this.view = new ODataService(this.http, this.url, this.tableName);
@@ -117,7 +125,76 @@ export class GridODataComponent implements OnInit {
     this.sort = sort;
     this.load();
   }
+
+  oDataVersion = 4;
+
+  public aggregations: any = {};
+  private aggregationSelects: Map<string, string> = new Map<string, string>();
+  public aggregationChange(event, id) {
+    this.aggregationSelects.set(id, event);
+  }
+
+
+  public aliases: any = {};
+  private aliasInputs: Map<string, string> = new Map<string, string>();
+  public aliasChange(event, id) {
+    this.aliasInputs.set(id, event);
+  }
+
+  aggregationDummy: string;
   public groupChange(groups: GroupDescriptor[]): void {
+    if (groups && groups.length > 0) {
+      groups.forEach(group => {
+
+
+        this.aggregationSelects.forEach((value, key) => {
+          if (value && value != 'none') {
+
+            // let alias = key;
+            // const aliasInput = this.aliasInputs.get(key);
+            // if(aliasInput) {
+            //   alias = aliasInput;
+            // }
+            let alias = key;
+            const aliasInput = this.aliases[key];
+            if(aliasInput) {
+              alias = aliasInput;
+            }
+
+
+            const agreggates = new Array<AggregateDescriptor>();
+            agreggates.push(<any>{ field: key, aggregate: <any>value, alias: alias });
+            group.aggregates = agreggates;
+          }
+        });
+
+
+        // if (this.aggregationSelects.has(nameAggreg)) {
+        //   let selectValue: any = this.aggregationSelects.get(nameAggreg);
+
+        //   const agreggates = new Array<AggregateDescriptor>();
+        //   const keys = this.metadata.columns.filter(c => c.key);
+        //   keys.forEach(key => {
+        //     agreggates.push({ field: key.name, aggregate: selectValue });
+        //   });
+        //   group.aggregates = agreggates;
+        // }
+      });
+
+
+
+      // groups.forEach(group => {
+      //   const agreggates = new Array<AggregateDescriptor>();
+      //   //Maybe should be abble to allow the user to specify the aggregate (PivotGrid?)
+      //   const keys = this.metadata.columns.filter(c => c.key);
+      //   // const key = keys[0];
+      //   // agreggates.push({ field: key.name, aggregate: 'count' });
+      //   keys.forEach(key => {
+      //     agreggates.push({ field: key.name, aggregate: 'count' });
+      //   });
+      //   group.aggregates = agreggates;
+      // });
+    }
     this.groups = groups;
     this.load();
   }
@@ -146,8 +223,14 @@ export class GridODataComponent implements OnInit {
       };
     }
 
+
+    if(!this.paginate){
+      delete stateToQuery.skip;
+      delete stateToQuery.take;
+    }
+
     if ((!!this.url) && (!!this.tableName)) {
-      this.service.query(stateToQuery, this.url, this.tableName);
+      this.service.query(stateToQuery, this.url, this.tableName, true, this.oDataVersion);
     }
 
   }

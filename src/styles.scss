@@ -71,6 +71,9 @@ ion-menu ion-content {
   }
 }
 
+.item-md {
+  padding-left: 0px !important;
+}
 
 .split-pane-visible > .split-pane-side {//[side=left]
     max-width: 250px !important;

@@ -12,15 +12,22 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
     super(null);
   }
 
-  private fetch(state: State, url: string, tableName: string, includeCount = true): Observable<GridDataResult> {
+  private fetch(state: State, url: string, tableName: string, includeCount = true, version = 4): Observable<GridDataResult> {
     const queryStr = `${toODataString(state)}`;
 
     let uri = `${url}${tableName}?${queryStr}`;
 
-    if (includeCount) {
-      uri += "&$count=true";
+
+    if (version >= 4) {
+      if (includeCount) {
+        uri += "&$count=true";
+      }
+      uri += "&$format=json";
+    } else {
+      if (includeCount) {
+        uri += "&$inlinecount=allpages";
+      }
     }
-    uri += "&$format=json";
 
     const hasGroups = state.group.length > 0;
     if (hasGroups) {
@@ -32,14 +39,30 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
         //TODO: Aggregates TEST
         if (groupDesc.aggregates && groupDesc.aggregates.length > 0) {
 
+          let aggregate = "";
+
           groupDesc.aggregates.forEach(agreg => {
             let operator: string = agreg.aggregate;
             const agregField = agreg.field;
 
-            if(operator == 'count'){ operator = 'countdistinct' };
+            if (operator == 'count') { operator = 'countdistinct' };
 
-            group += `,aggregate(${agregField} with ${operator} as ${agregField})`;
+
+            if((<any>agreg).alias){
+              aggregate += `${agregField} with ${operator} as ` + (<any>agreg).alias + ",";
+            }else{
+              aggregate += `${agregField} with ${operator} as ${agregField},`;
+            }
+
+            //group += `,aggregate(${agregField} with ${operator} as ${agregField})`;
+
+            
           });
+          aggregate = aggregate.slice(0, -1);
+
+          const aggregateClause = `,aggregate(${aggregate})`;
+
+          group += aggregateClause;
         }
         //aggregate(IdProcesso with countdistinct as IdProcesso)
       });
@@ -52,14 +75,25 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
 
     return this.http
       .get(uri)
-      .debounceTime(750)
       .map(response => response.json())
       .map(response => {
 
-        let total = state.take;
-        const responseCount = response["@odata.count"];
+        let total = 0;
+        const responseCount = response["@odata.count"] || response["odata.count"];
         if (responseCount) {
           total = parseInt(responseCount, 10);
+        } else {
+          const arrayValues = response.value as Array<any>;
+          total = arrayValues.length;
+          if (state && state.take && state.take > 0) {
+            if (arrayValues.length < state.take) {
+              total = arrayValues.length;
+            } else {
+              total = state.take;
+            }
+          }
+
+
         }
 
 
@@ -74,8 +108,8 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
       });
   }
 
-  public query(state: State, url: string, tableName: string): void {
-    this.fetch(state, url, tableName)
+  public query(state: State, url: string, tableName: string, includeCount = true, version = 4): void {
+    this.fetch(state, url, tableName, includeCount, version)
       .subscribe(x => super.next(x));
   }
 

@@ -12,40 +12,47 @@
         [filter]="filter"
         [filterable]="true"
         (filterChange)="filterChange($event)"
-              [groupable]="true"
+              [groupable]="oDataVersion >= 4"
               [group]="groups"
               (groupChange)="groupChange($event)"
 >
   <ng-template kendoGridToolbarTemplate>
-    <div>
-      <label for="inputPageSize">Page Size:</label>
-      <input type="text" name="inputPageSize" width="30" [(ngModel)]="pageSize" />
-    </div>
-    <button type="button" kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
-    <button type="button" kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
-    <button type="button" (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
+    <ion-item>
+      <ion-checkbox [(ngModel)]="paginate"></ion-checkbox>
+      <ion-label for="inputPageSize">Page Size:</ion-label>
+      <ion-input type="text" name="inputPageSize" [(ngModel)]="pageSize"></ion-input>
+    </ion-item>
+    <ion-item>
+    <button ion-button kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
+    <button ion-button kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
+    <button ion-button (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
+    </ion-item>
   </ng-template>
 
-<ng-template ngFor [ngForOf]="columns" let-column>
-            <kendo-grid-column
-              field="{{column.field}}"
-              [width]="150"
-              editor="{{column.editor}}"
-              filter="{{column.filter}}"
-              [hidden]="hiddenColumns.indexOf(column.name) > -1"
-            >
-              <ng-template kendoGridHeaderTemplate let-dataItem>
-                  {{dataItem.field}}
-                  <button
-                    (click)="hideColumn(dataItem.field)"
-                    class="k-button k-primary"
-                    style="float: right;"
-                  >
-                    Hide
-                  </button>
-              </ng-template>
-            </kendo-grid-column>
-          </ng-template>
+  <ng-template ngFor [ngForOf]="columns" let-column>
+    <kendo-grid-column field="{{column.field}}" [width]="150" editor="{{column.editor}}" filter="{{column.filter}}" [hidden]="hiddenColumns.indexOf(column.name) > -1">
+      <ng-template kendoGridHeaderTemplate let-dataItem>
+        {{dataItem.field}}
+        <button (click)="hideColumn(dataItem.field)" class="k-button k-primary" style="float: right;">
+          Hide
+        </button>
+      </ng-template>
+      <ng-template kendoGridFooterTemplate *ngIf="oDataVersion >= 4">
+        <ion-item>
+          <ion-label>Aggregate '<span>{{column.field}}</span>':</ion-label> 
+          <ion-select [(ngModel)]="aggregations[column.field]" (ionChange)="aggregationChange($event, column.field)" id="{{column.field}}Aggregation">
+            <ion-option [value]="'none'">None</ion-option>
+            <ion-option [value]="'countdistinct'">Count</ion-option>
+            <ion-option [value]="'sum'">Sum</ion-option>
+            <ion-option [value]="'max'">Max</ion-option>
+            <ion-option [value]="'min'">Min</ion-option>
+            <ion-option [value]="'average'">Average</ion-option>
+          </ion-select>
+          <ion-input [value]="column.field" [(ngModel)]="aliases[column.field]" id="{{column.field}}Input"></ion-input>
+        </ion-item>
+      </ng-template>
+    </kendo-grid-column>
+  </ng-template>
 
   <!--<div *kendoGridDetailTemplate="let dataItem">
     <ng-content></ng-content>

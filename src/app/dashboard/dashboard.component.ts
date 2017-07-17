@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit {
     @ViewChild(GridODataComponent) grid: GridODataComponent;
 
     public onUrlChange(url: string) {
+        localStorage.setItem('oDataUrl',url);
         this.getTables(url);
     }
 
@@ -40,12 +41,12 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    metadata: Array<{ name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }>;
+    metadata: Array<{ version : number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }>;
 
     private getTables(url: string) {
 
 
-        let retorno: Array<{ name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }> = [];
+        let retorno: Array<{ version : number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }> = [];
 
         let format: 'xml' | 'json' = 'xml';
         if (format == 'xml') {
@@ -55,9 +56,21 @@ export class DashboardComponent implements OnInit {
                     let response = value.text();
                     let parser = new DOMParser();
 
-                    const entidades = new Array<{ name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> }>();
+                    const entidades = new Array<{ version : number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> }>();
 
                     let xmlDoc = parser.parseFromString(response, "text/xml");
+                    let edmx = xmlDoc.getElementsByTagName("Edmx");
+
+                    //version
+                    let version = 4;
+                    if(edmx && edmx.length > 0){
+                        const node = edmx[0];
+                        const versionString = node.attributes["Version"].value;
+                        if(versionString){
+                            version = parseInt(versionString);
+                        }
+                    }
+
                     let entitySets = xmlDoc.getElementsByTagName("EntitySet");
                     let entityTypes = xmlDoc.getElementsByTagName("EntityType");
                     for (var ia = 0; ia < entitySets.length; ia++) {
@@ -102,7 +115,7 @@ export class DashboardComponent implements OnInit {
                                         name: columnEntityTypeName,
                                         type: columnTypeJs,
                                         nullable: columnIsNullable,
-                                        key: columnIsKey
+                                        key: columnIsKey,
                                     };
 
                                     colunas.push(coluna);
@@ -113,9 +126,10 @@ export class DashboardComponent implements OnInit {
                         }
 
 
-                        let item: { name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
+                        let item: { version : number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
                             name: name,
-                            columns: colunas
+                            columns: colunas,
+                            version: version
                         };
 
                         entidades.push(item);
@@ -124,6 +138,7 @@ export class DashboardComponent implements OnInit {
                 })
                 .subscribe(json => {
                     this.metadata = json;
+                    this.grid.oDataVersion = json[0].version || 4;
                     // const tables: Array<{ kind: string, name: string, url: string }> = json.value;
                     // this.tables = tables.filter(table => table.kind == 'EntitySet').map(table => table.name);
                     this.tables = this.metadata.map(r => r.name);
@@ -144,6 +159,7 @@ export class DashboardComponent implements OnInit {
 
     updateGrid(value: string) {
         if (!!value) {
+            localStorage.setItem('oDataTable', value);
             this.tableName = value;
             this.grid.tableName = value;
             if (this.metadata) {
@@ -152,6 +168,9 @@ export class DashboardComponent implements OnInit {
                     this.grid.metadata = metadataTable[0];
                 }
             }
+            this.grid.sort = [];
+            this.grid.groups = [];
+            
             this.grid.refresh();
         }
 
@@ -168,8 +187,20 @@ export class DashboardComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.url = "https://services.odata.org/TripPinRESTierService/(S(3mslpb2bc0k5ufk24olpghzx))/";
+        const oDataUrl = localStorage.getItem('oDataUrl');
+        if(oDataUrl){
+            this.url = oDataUrl;
+        }else{
+            this.url = "https://services.odata.org/TripPinRESTierService/(S(3mslpb2bc0k5ufk24olpghzx))/";
+        }
+        
         this.getTables(this.url);
+
+        const table = localStorage.getItem('oDataTable');
+        if(table){
+            this.tableName = table;
+        }
+
         console.debug('DashboardComponent ngOnInit');
     }
 }
