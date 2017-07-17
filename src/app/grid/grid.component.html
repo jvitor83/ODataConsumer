@@ -30,6 +30,7 @@
           <ion-item class="item-label-nomargin">
             <button ion-button kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
             <button ion-button kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
+            <button ion-button (click)="restoreColumns()" class="k-button">Restore hidden columns</button>
             <button ion-button (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
           </ion-item>
         </ion-col>
@@ -38,7 +39,7 @@
   </ng-template>
 
   <ng-template ngFor [ngForOf]="columns" let-column>
-    <kendo-grid-column field="{{column.field}}" [width]="150" editor="{{column.editor}}" filter="{{column.filter}}" [hidden]="hiddenColumns.indexOf(column.name) > -1">
+    <kendo-grid-column field="{{column.field}}" [width]="150" editor="{{column.editor}}" filter="{{column.filter}}" [hidden]="hiddenColumns.indexOf(column.field) > -1">
       <ng-template kendoGridHeaderTemplate let-dataItem>
         {{dataItem.field}}
         <button (click)="hideColumn(dataItem.field)" class="k-button k-primary" style="float: right;">

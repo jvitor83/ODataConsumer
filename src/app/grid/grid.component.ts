@@ -208,6 +208,8 @@ export class GridODataComponent implements OnInit {
     this.load();
   }
 
+  selectOnlyVisible: boolean = true;
+
   private load(state?: State): void {
     let stateToQuery: State = null;
 
@@ -228,6 +230,21 @@ export class GridODataComponent implements OnInit {
       delete stateToQuery.skip;
       delete stateToQuery.take;
     }
+
+    if(this.selectOnlyVisible && this.hiddenColumns.length > 0) {
+      let selects = new Array<string>();
+      
+      let columnsToSelect = this.columns.map(c => c.field).filter(column => {
+        const includes = this.hiddenColumns.includes(column);
+        const notIncludes = !includes;
+        return notIncludes;
+      });
+      columnsToSelect.forEach(col => {
+        selects.push(col);
+      });
+      (<any>stateToQuery).select = selects;
+    }
+
 
     if ((!!this.url) && (!!this.tableName)) {
       this.service.query(stateToQuery, this.url, this.tableName, true, this.oDataVersion);

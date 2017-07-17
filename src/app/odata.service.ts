@@ -60,9 +60,9 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
           });
           aggregate = aggregate.slice(0, -1);
 
-          const aggregateClause = `,aggregate(${aggregate})`;
+          const aggregateClause = `aggregate(${aggregate})`;
 
-          group += aggregateClause;
+          group += "," + aggregateClause;
         }
         //aggregate(IdProcesso with countdistinct as IdProcesso)
       });
@@ -70,6 +70,19 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
       const groupClause = `&$apply=groupby(${group})`;
       uri += groupClause;
     }
+
+
+    if((<any>state).select) {
+      let selectColumns = "";
+      const selects: Array<string> = (<any>state).select;
+      selects.forEach(col => {
+        selectColumns += col + ",";
+      });
+      selectColumns = selectColumns.slice(0, -1);
+      const selectClause = `$select=${selectColumns}`;
+      uri += "&" + selectClause;
+    }
+
 
     console.log(`REQUEST URL: '${uri}'`);
 
