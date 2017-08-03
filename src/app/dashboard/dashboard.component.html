@@ -7,7 +7,7 @@
       </ion-item>
       <ion-item>
         <ion-label for="selectTable">Entities:</ion-label>
-        <ion-select [interface]="'popover'" name="selectTable" (ngModelChange)="updateGrid($event)" [(ngModel)]="tableName">
+        <ion-select interface="popover" name="selectTable" (ngModelChange)="updateGrid($event)" [(ngModel)]="tableName">
           <ion-option *ngFor="let table of tables" [value]="table">{{table}}</ion-option>
         </ion-select>
       </ion-item>

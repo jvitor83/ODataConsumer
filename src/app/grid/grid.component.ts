@@ -235,7 +235,7 @@ export class GridODataComponent implements OnInit {
       let selects = new Array<string>();
       
       let columnsToSelect = this.columns.map(c => c.field).filter(column => {
-        const includes = this.hiddenColumns.includes(column);
+        const includes = this.hiddenColumns.indexOf(column) > -1;
         const notIncludes = !includes;
         return notIncludes;
       });

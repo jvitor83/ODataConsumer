@@ -1,5 +1,6 @@
 {
   "name": "ODataConsumer",
   "app_id": "",
-  "projectTypeId": "ionic-angular"
+  "type": "ionic-angular",
+  "watchPatterns": []
 }
