@@ -170,6 +170,7 @@ export class DashboardComponent implements OnInit {
             }
             this.grid.sort = [];
             this.grid.groups = [];
+            this.grid.aggregations = [];
             
             this.grid.refresh();
         }
@@ -191,7 +192,7 @@ export class DashboardComponent implements OnInit {
         if(oDataUrl){
             this.url = oDataUrl;
         }else{
-            this.url = "https://services.odata.org/TripPinRESTierService/(S(3mslpb2bc0k5ufk24olpghzx))/";
+            this.url = "https://gis.ices.dk/qcservice/api/qcdata/";
         }
         
         this.getTables(this.url);
@@ -199,6 +200,8 @@ export class DashboardComponent implements OnInit {
         const table = localStorage.getItem('oDataTable');
         if(table){
             this.tableName = table;
+        }else{
+            this.tableName = 'mains';
         }
 
         console.debug('DashboardComponent ngOnInit');
