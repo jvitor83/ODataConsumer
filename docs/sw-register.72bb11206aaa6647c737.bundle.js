@@ -1,0 +1,1 @@
+webpackJsonp([7],{1:function(r,e,o){r.exports=o("EUKP")},EUKP:function(r,e){"serviceWorker"in navigator&&navigator.serviceWorker.register("worker-basic.min.js").catch(function(r){console.error("Error registering service worker:",r)})}},[1]);
