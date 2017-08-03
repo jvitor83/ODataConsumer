@@ -19,20 +19,24 @@
   <ng-template kendoGridToolbarTemplate>
     <ion-grid>
       <ion-row>
-        <ion-col col-auto>
+        <ion-col col-4-auto>
           <ion-item>
             <ion-checkbox [(ngModel)]="paginate"></ion-checkbox>
             <ion-label for="inputPageSize">Page Size:</ion-label>
             <ion-input class="pageSizeInput" type="number" name="inputPageSize" [(ngModel)]="pageSize"></ion-input>
           </ion-item>
         </ion-col>
-        <ion-col>
-          <ion-item class="item-label-nomargin">
-            <button ion-button kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
-            <button ion-button kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
-            <button ion-button (click)="restoreColumns()" class="k-button">Restore hidden columns</button>
-            <button ion-button (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
-          </ion-item>
+        <ion-col col-2-auto>
+          <button ion-button small kendoGridPDFCommand><span class='k-icon k-i-file-pdf'></span>Export to PDF</button>
+        </ion-col>
+        <ion-col col-2-auto>
+          <button ion-button small kendoGridExcelCommand><span class="k-icon k-i-file-excel"></span>Export to Excel</button>
+        </ion-col>
+        <ion-col col-2-auto>
+          <button ion-button small (click)="restoreColumns()"><span class="k-icon k-i-reset"></span>Restore hidden columns</button>
+        </ion-col>
+        <ion-col col-2-auto>
+          <button ion-button small (click)="refresh()"><span class="k-icon k-i-refresh"></span>Refresh</button>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -48,7 +52,13 @@
       </ng-template>
       <ng-template kendoGridFooterTemplate *ngIf="oDataVersion >= 4">
         <ion-item>
-          <ion-label>Aggregate '<span>{{column.field}}</span>':</ion-label> 
+          <ion-label>Aggregate</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>'{{column.field}}'</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>with:</ion-label>
           <ion-select [(ngModel)]="aggregations[column.field]" (ionChange)="aggregationChange($event, column.field)" id="{{column.field}}Aggregation">
             <ion-option [value]="'none'">None</ion-option>
             <ion-option [value]="'countdistinct'">Count</ion-option>
@@ -57,6 +67,9 @@
             <ion-option [value]="'min'">Min</ion-option>
             <ion-option [value]="'average'">Average</ion-option>
           </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>as:</ion-label>
           <ion-input [value]="column.field" [(ngModel)]="aliases[column.field]" id="{{column.field}}Input"></ion-input>
         </ion-item>
       </ng-template>
