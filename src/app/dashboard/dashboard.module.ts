@@ -1,3 +1,4 @@
+import { AggregateModalComponent } from './../grid/aggregate-modal/aggregate-modal.component';
 import { FormsModule } from '@angular/forms';
 import { GridModule } from '@progress/kendo-angular-grid';
 import { GridODataComponent } from './../grid/grid.component';

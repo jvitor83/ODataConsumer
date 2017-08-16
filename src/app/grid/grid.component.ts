@@ -1,3 +1,4 @@
+import { AggregateModalComponent } from './aggregate-modal/aggregate-modal.component';
 import { state } from '@angular/animations';
 import { Http } from '@angular/http';
 import { ODataService } from './../odata.service';
@@ -5,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { Component, OnInit, ViewChild, Input, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
 import { GridDataResult, PageChangeEvent, GridComponent, FooterTemplateDirective } from "@progress/kendo-angular-grid";
 import { SortDescriptor, State, FilterDescriptor, GroupDescriptor, CompositeFilterDescriptor, AggregateDescriptor } from "@progress/kendo-data-query";
-import { Select } from 'ionic-angular';
+import { Select, ModalController } from 'ionic-angular';
 import { Subject } from "rxjs/Subject";
 
 
@@ -36,7 +37,7 @@ export class GridODataComponent implements OnInit {
 
   @ViewChildren(Select, { read: ViewContainerRef }) selects: QueryList<Select>;
 
-  constructor(private http: Http, private service: ODataService) {
+  constructor(private http: Http, private service: ODataService, public modalCtrl: ModalController) {
 
     //const url = "http://localhost:8153/api.rsc";
     //"dbo_Usuario"
@@ -132,6 +133,9 @@ export class GridODataComponent implements OnInit {
   private aggregationSelects: Map<string, string> = new Map<string, string>();
   public aggregationChange(event, id) {
     this.aggregationSelects.set(id, event);
+
+
+
   }
 
 
@@ -143,60 +147,69 @@ export class GridODataComponent implements OnInit {
 
   aggregationDummy: string;
   public groupChange(groups: GroupDescriptor[]): void {
-    if (groups && groups.length > 0) {
-      groups.forEach(group => {
+
+    let columns = (this.metadata && this.metadata.columns) || this.columns;
+    let modal = this.modalCtrl.create(AggregateModalComponent, columns);
+    modal.onDidDismiss(data => {
+      console.log('--------');
+    });
+    modal.present();
+    
+
+    // if (groups && groups.length > 0) {
+    //   groups.forEach(group => {
 
 
-        this.aggregationSelects.forEach((value, key) => {
-          if (value && value != 'none') {
+    //     this.aggregationSelects.forEach((value, key) => {
+    //       if (value && value != 'none') {
 
-            // let alias = key;
-            // const aliasInput = this.aliasInputs.get(key);
-            // if(aliasInput) {
-            //   alias = aliasInput;
-            // }
-            let alias = key;
-            const aliasInput = this.aliases[key];
-            if(aliasInput) {
-              alias = aliasInput;
-            }
-
-
-            const agreggates = new Array<AggregateDescriptor>();
-            agreggates.push(<any>{ field: key, aggregate: <any>value, alias: alias });
-            group.aggregates = agreggates;
-          }
-        });
+    //         // let alias = key;
+    //         // const aliasInput = this.aliasInputs.get(key);
+    //         // if(aliasInput) {
+    //         //   alias = aliasInput;
+    //         // }
+    //         let alias = key;
+    //         const aliasInput = this.aliases[key];
+    //         if(aliasInput) {
+    //           alias = aliasInput;
+    //         }
 
 
-        // if (this.aggregationSelects.has(nameAggreg)) {
-        //   let selectValue: any = this.aggregationSelects.get(nameAggreg);
-
-        //   const agreggates = new Array<AggregateDescriptor>();
-        //   const keys = this.metadata.columns.filter(c => c.key);
-        //   keys.forEach(key => {
-        //     agreggates.push({ field: key.name, aggregate: selectValue });
-        //   });
-        //   group.aggregates = agreggates;
-        // }
-      });
+    //         const agreggates = new Array<AggregateDescriptor>();
+    //         agreggates.push(<any>{ field: key, aggregate: <any>value, alias: alias });
+    //         group.aggregates = agreggates;
+    //       }
+    //     });
 
 
+    //     // if (this.aggregationSelects.has(nameAggreg)) {
+    //     //   let selectValue: any = this.aggregationSelects.get(nameAggreg);
 
-      // groups.forEach(group => {
-      //   const agreggates = new Array<AggregateDescriptor>();
-      //   //Maybe should be abble to allow the user to specify the aggregate (PivotGrid?)
-      //   const keys = this.metadata.columns.filter(c => c.key);
-      //   // const key = keys[0];
-      //   // agreggates.push({ field: key.name, aggregate: 'count' });
-      //   keys.forEach(key => {
-      //     agreggates.push({ field: key.name, aggregate: 'count' });
-      //   });
-      //   group.aggregates = agreggates;
-      // });
-    }
-    this.groups = groups;
-    this.load();
+    //     //   const agreggates = new Array<AggregateDescriptor>();
+    //     //   const keys = this.metadata.columns.filter(c => c.key);
+    //     //   keys.forEach(key => {
+    //     //     agreggates.push({ field: key.name, aggregate: selectValue });
+    //     //   });
+    //     //   group.aggregates = agreggates;
+    //     // }
+    //   });
+
+
+
+    //   // groups.forEach(group => {
+    //   //   const agreggates = new Array<AggregateDescriptor>();
+    //   //   //Maybe should be abble to allow the user to specify the aggregate (PivotGrid?)
+    //   //   const keys = this.metadata.columns.filter(c => c.key);
+    //   //   // const key = keys[0];
+    //   //   // agreggates.push({ field: key.name, aggregate: 'count' });
+    //   //   keys.forEach(key => {
+    //   //     agreggates.push({ field: key.name, aggregate: 'count' });
+    //   //   });
+    //   //   group.aggregates = agreggates;
+    //   // });
+    // }
+    // this.groups = groups;
+    // this.load();
   }
   public filterChange(filter: CompositeFilterDescriptor): void {
     this.filter = filter;
