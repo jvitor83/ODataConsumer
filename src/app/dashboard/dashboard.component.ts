@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
     @ViewChild(GridODataComponent) grid: GridODataComponent;
 
     public onUrlChange(url: string) {
-        localStorage.setItem('oDataUrl',url);
+        localStorage.setItem('oDataUrl', url);
         this.getTables(url);
     }
 
@@ -41,120 +41,122 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    metadata: Array<{ version : number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }>;
+    metadata: Array<{ version: number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }>;
 
     private getTables(url: string) {
+        let ret: Observable<any> = null;
 
-
-        let retorno: Array<{ version : number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }> = [];
+        let retorno: Array<{ version: number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }> = [];
 
         let format: 'xml' | 'json' = 'xml';
         if (format == 'xml') {
+            console.log('reading metadata from xml');
             const urlMetadata = `${url}$metadata`;
-            this.http.get(urlMetadata)
-                .map(value => {
-                    let response = value.text();
-                    let parser = new DOMParser();
+            ret = this.http.get(urlMetadata);
+            ret.map(value => {
+                let response = value.text();
+                let parser = new DOMParser();
 
-                    const entidades = new Array<{ version : number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> }>();
+                const entidades = new Array<{ version: number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> }>();
 
-                    let xmlDoc = parser.parseFromString(response, "text/xml");
-                    let edmx = xmlDoc.getElementsByTagName("Edmx");
+                let xmlDoc = parser.parseFromString(response, "text/xml");
+                let edmx = xmlDoc.getElementsByTagName("Edmx");
 
-                    //version
-                    let version = 4;
-                    if(edmx && edmx.length > 0){
-                        const node = edmx[0];
-                        const versionString = node.attributes["Version"].value;
-                        if(versionString){
-                            version = parseInt(versionString);
-                        }
+                //version
+                let version = 4;
+                if (edmx && edmx.length > 0) {
+                    const node = edmx[0];
+                    const versionString = node.attributes["Version"].value;
+                    if (versionString) {
+                        version = parseInt(versionString);
                     }
+                }
 
-                    let entitySets = xmlDoc.getElementsByTagName("EntitySet");
-                    let entityTypes = xmlDoc.getElementsByTagName("EntityType");
-                    for (var ia = 0; ia < entitySets.length; ia++) {
+                let entitySets = xmlDoc.getElementsByTagName("EntitySet");
+                let entityTypes = xmlDoc.getElementsByTagName("EntityType");
+                for (var ia = 0; ia < entitySets.length; ia++) {
 
-                        let entitySet = entitySets[ia];
-                        const name = entitySet.attributes["Name"].value;
-                        const entityTypeSplit: string[] = entitySet.attributes["EntityType"].value.split('.');
-                        const entityTypeName = entityTypeSplit[entityTypeSplit.length - 1];
+                    let entitySet = entitySets[ia];
+                    const name = entitySet.attributes["Name"].value;
+                    const entityTypeSplit: string[] = entitySet.attributes["EntityType"].value.split('.');
+                    const entityTypeName = entityTypeSplit[entityTypeSplit.length - 1];
 
-                        const colunas = new Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }>();
+                    const colunas = new Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }>();
 
-                        for (var ib = 0; ib < entityTypes.length; ib++) {
-                            const entityType = entityTypes[ib];
-                            const entityTypeAttributeName = entityType.attributes["Name"].value;
-                            if (entityTypeAttributeName == entityTypeName) {
+                    for (var ib = 0; ib < entityTypes.length; ib++) {
+                        const entityType = entityTypes[ib];
+                        const entityTypeAttributeName = entityType.attributes["Name"].value;
+                        if (entityTypeAttributeName == entityTypeName) {
 
-                                const keys = new Array<string>();
-                                const columnsEntityType = entityType.getElementsByTagName("Property");
-                                const keysEntityType = entityType.getElementsByTagName("Key");
-                                if (keysEntityType && keysEntityType.length > 0) {
-                                    const keyEntityType = keysEntityType[0];
-                                    const keysOfEntityType = keyEntityType.getElementsByTagName("PropertyRef");
-                                    for (var ic = 0; ic < keysOfEntityType.length; ic++) {
-                                        const keyOfEntityType = keysOfEntityType[ic];
-                                        const keyName = keyOfEntityType.attributes["Name"].value;
-                                        keys.push(keyName);
-                                    }
+                            const keys = new Array<string>();
+                            const columnsEntityType = entityType.getElementsByTagName("Property");
+                            const keysEntityType = entityType.getElementsByTagName("Key");
+                            if (keysEntityType && keysEntityType.length > 0) {
+                                const keyEntityType = keysEntityType[0];
+                                const keysOfEntityType = keyEntityType.getElementsByTagName("PropertyRef");
+                                for (var ic = 0; ic < keysOfEntityType.length; ic++) {
+                                    const keyOfEntityType = keysOfEntityType[ic];
+                                    const keyName = keyOfEntityType.attributes["Name"].value;
+                                    keys.push(keyName);
                                 }
-
-
-                                for (var id = 0; id < columnsEntityType.length; id++) {
-                                    const columnEntityType = columnsEntityType[id];
-
-                                    const columnEntityTypeName = columnEntityType.attributes["Name"].value;
-                                    const columnType = columnEntityType.attributes["Type"].value;
-                                    const columnTypeJs = DashboardComponent.columnType(columnType);
-                                    const columnIsNullable = columnEntityType.attributes["Nullable"] && columnEntityType.attributes["Nullable"].value || null;
-
-                                    const columnIsKey = keys.filter(r => r == columnEntityTypeName).length > 0;
-
-                                    let coluna: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean } = {
-                                        name: columnEntityTypeName,
-                                        type: columnTypeJs,
-                                        nullable: columnIsNullable,
-                                        key: columnIsKey,
-                                    };
-
-                                    colunas.push(coluna);
-                                }
-
-
                             }
+
+
+                            for (var id = 0; id < columnsEntityType.length; id++) {
+                                const columnEntityType = columnsEntityType[id];
+
+                                const columnEntityTypeName = columnEntityType.attributes["Name"].value;
+                                const columnType = columnEntityType.attributes["Type"].value;
+                                const columnTypeJs = DashboardComponent.columnType(columnType);
+                                const columnIsNullable = columnEntityType.attributes["Nullable"] && columnEntityType.attributes["Nullable"].value || null;
+
+                                const columnIsKey = keys.filter(r => r == columnEntityTypeName).length > 0;
+
+                                let coluna: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean } = {
+                                    name: columnEntityTypeName,
+                                    type: columnTypeJs,
+                                    nullable: columnIsNullable,
+                                    key: columnIsKey,
+                                };
+
+                                colunas.push(coluna);
+                            }
+
+
                         }
-
-
-                        let item: { version : number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
-                            name: name,
-                            columns: colunas,
-                            version: version
-                        };
-
-                        entidades.push(item);
                     }
-                    return entidades;
-                })
-                .subscribe(json => {
-                    this.metadata = json;
-                    this.grid.oDataVersion = json[0].version || 4;
-                    // const tables: Array<{ kind: string, name: string, url: string }> = json.value;
-                    // this.tables = tables.filter(table => table.kind == 'EntitySet').map(table => table.name);
-                    this.tables = this.metadata.map(r => r.name);
-                });
+
+
+                    let item: { version: number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
+                        name: name,
+                        columns: colunas,
+                        version: version
+                    };
+
+                    entidades.push(item);
+                }
+                return entidades;
+            }).subscribe(json => {
+                this.metadata = json;
+                this.grid.oDataVersion = json[0].version || 4;
+                // const tables: Array<{ kind: string, name: string, url: string }> = json.value;
+                // this.tables = tables.filter(table => table.kind == 'EntitySet').map(table => table.name);
+                this.tables = this.metadata.map(r => r.name);
+                console.log('readed metadata from xml');
+            });
         } else if (format == 'json') {
             const urlMetadata = `${url}#metadata`;
-            this.http.get(urlMetadata)
-                .map(value => {
-                    let response = value.json();
-                    return response;
-                })
+            ret = this.http.get(urlMetadata);
+            ret.map(value => {
+                let response = value.json();
+                return response;
+            })
                 .subscribe(json => {
                     const tables: Array<{ kind: string, name: string, url: string }> = json.value;
                     this.tables = tables.filter(table => table.kind == 'EntitySet').map(table => table.name);
                 });
         }
+        return ret;
     }
 
     updateGrid(value: string) {
@@ -171,7 +173,7 @@ export class DashboardComponent implements OnInit {
             this.grid.sort = [];
             this.grid.groups = [];
             this.grid.aggregations = [];
-            
+
             this.grid.refresh();
         }
 
@@ -189,20 +191,23 @@ export class DashboardComponent implements OnInit {
 
     ngOnInit(): void {
         const oDataUrl = localStorage.getItem('oDataUrl');
-        if(oDataUrl){
+        if (oDataUrl) {
             this.url = oDataUrl;
-        }else{
+        } else {
             this.url = "https://gis.ices.dk/qcservice/api/qcdata/";
         }
-        
-        this.getTables(this.url);
 
-        const table = localStorage.getItem('oDataTable');
-        if(table){
-            this.tableName = table;
-        }else{
-            this.tableName = 'mains';
-        }
+        this.getTables(this.url).subscribe(() => {
+
+            const table = localStorage.getItem('oDataTable');
+            if (table) {
+                this.tableName = table;
+            } else {
+                this.tableName = 'mains';
+            }
+            this.updateGrid(table);
+        });
+
 
         console.debug('DashboardComponent ngOnInit');
     }

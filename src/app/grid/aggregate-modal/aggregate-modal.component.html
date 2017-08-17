@@ -1,29 +1,42 @@
-<div *ngFor="let column of columns">
+<div class="aggregateModalContainer">
+  <form (ngSubmit)="submit()">
+
+    <button ion-button type="submit" block>Add Aggregate</button>
+  </form>
+  <kendo-grid >
+
+  </kendo-grid>
+</div>
+
+
+<!-- <div class="aggregateModalContainer" *ngFor="let column of columns">
   <ion-grid>
     <ion-row>
-        <ion-col>
+        <ion-col col-auto>
           <ion-label>Aggregate</ion-label>
         </ion-col>
-        <ion-col>
-          <ion-label>'{{column.name}}'</ion-label>
+        <ion-col col-auto>
+          <ion-label>'{{column.field}}'</ion-label>
         </ion-col>
-        <ion-col>
+        <ion-col col-auto>
           <ion-label>with:</ion-label>
         </ion-col>
-        <ion-col>
+        <ion-col col-auto>
           <ion-select>
             <ion-option [value]="'none'">None</ion-option>
-            <ion-option [value]="'countdistinct'">Count</ion-option>
+            <ion-option [value]="'countdistinct'" [selected]="column.key">Count</ion-option>
             <ion-option [value]="'sum'">Sum</ion-option>
             <ion-option [value]="'max'">Max</ion-option>
             <ion-option [value]="'min'">Min</ion-option>
             <ion-option [value]="'average'">Average</ion-option>
           </ion-select>
         </ion-col>
-        <ion-col>
+        <ion-col col-auto>
           <ion-label>as:</ion-label>
-          <ion-input [value]="column.name" id="{{column.name}}Input"></ion-input>
+        </ion-col>
+        <ion-col col-auto>
+          <ion-input [value]="column.field" id="{{column.field}}Input"></ion-input>
         </ion-col>
     </ion-row>
   </ion-grid>
-</div>
+</div> -->

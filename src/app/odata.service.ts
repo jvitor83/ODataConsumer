@@ -33,9 +33,11 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
     if (hasGroups) {
       let group = "(";
 
+      let fields = '(' + state.group.map(g => g.field).join(',') + ')';
+
+      group += fields + ',';
+
       state.group.forEach(groupDesc => {
-        const field = groupDesc.field;
-        group += `${field},`;
         //TODO: Aggregates TEST
         if (groupDesc.aggregates && groupDesc.aggregates.length > 0) {
 
@@ -53,24 +55,22 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
             }else{
               aggregate += `${agregField} with ${operator} as ${agregField},`;
             }
-
-            //group += `,aggregate(${agregField} with ${operator} as ${agregField})`;
-
+            
 
           });
           aggregate = aggregate.slice(0, -1);
 
           const aggregateClause = `aggregate(${aggregate})`;
 
-          group += "," + aggregateClause;
+          group += aggregateClause;
         }
 
         //aggregate(IdProcesso with countdistinct as IdProcesso)
       });
-      group = group.slice(0, -1);
+      
       group += ')';
 
-      const groupClause = `&$apply=groupby(${group})`;
+      const groupClause = `&$apply=groupby${group}`;
       uri += groupClause;
     }
 

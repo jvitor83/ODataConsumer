@@ -180,66 +180,90 @@ export class GridODataComponent implements OnInit {
   aggregationDummy: string;
   public groupChange(groups: GroupDescriptor[]): void {
 
-    // let columns = (this.metadata && this.metadata.columns) || this.columns;
-    // let modal = this.modalCtrl.create(AggregateModalComponent, columns);
-    // modal.onDidDismiss(data => {
-    //   console.log('--------');
-    // });
-    // modal.present();
-
-
     if (groups && groups.length > 0) {
-      groups.forEach(group => {
+      //groups.forEach(group => {
+        const group = groups[groups.length - 1];
 
-
-        this.aggregationSelects.forEach((value, key) => {
-          if (value && value != 'none') {
-
-            // let alias = key;
-            // const aliasInput = this.aliasInputs.get(key);
-            // if(aliasInput) {
-            //   alias = aliasInput;
-            // }
-            let alias = key;
-            const aliasInput = this.aliases[key];
-            if(aliasInput) {
-              alias = aliasInput;
+        let columns = (this.metadata && this.metadata.columns);// || this.columns;
+        if (columns) {
+          columns.forEach(c => {
+            if (c.key) {
+  
+              
+              const agreggates = new Array<AggregateDescriptor>();
+              agreggates.push(<any>{ field: c.name, aggregate: <any>'count', alias: c.name});
+              group.aggregates = agreggates;
+  
+  
             }
+          })
+        }
 
 
-            const agreggates = new Array<AggregateDescriptor>();
-            agreggates.push(<any>{ field: key, aggregate: <any>value, alias: alias });
-            group.aggregates = agreggates;
-          }
-        });
-
-
-        // if (this.aggregationSelects.has(nameAggreg)) {
-        //   let selectValue: any = this.aggregationSelects.get(nameAggreg);
-
-        //   const agreggates = new Array<AggregateDescriptor>();
-        //   const keys = this.metadata.columns.filter(c => c.key);
-        //   keys.forEach(key => {
-        //     agreggates.push({ field: key.name, aggregate: selectValue });
-        //   });
-        //   group.aggregates = agreggates;
-        // }
-      });
+      //});
 
 
 
-      // groups.forEach(group => {
-      //   const agreggates = new Array<AggregateDescriptor>();
-      //   //Maybe should be abble to allow the user to specify the aggregate (PivotGrid?)
-      //   const keys = this.metadata.columns.filter(c => c.key);
-      //   // const key = keys[0];
-      //   // agreggates.push({ field: key.name, aggregate: 'count' });
-      //   keys.forEach(key => {
-      //     agreggates.push({ field: key.name, aggregate: 'count' });
-      //   });
-      //   group.aggregates = agreggates;
+      // let modal = this.modalCtrl.create(AggregateModalComponent, columns);
+      // modal.onDidDismiss(data => {
+      //   console.log('--------');
       // });
+      // modal.present();
     }
+
+
+    // if (groups && groups.length > 0) {
+    //   groups.forEach(group => {
+
+
+    //     this.aggregationSelects.forEach((value, key) => {
+    //       if (value && value != 'none') {
+
+    //         // let alias = key;
+    //         // const aliasInput = this.aliasInputs.get(key);
+    //         // if(aliasInput) {
+    //         //   alias = aliasInput;
+    //         // }
+    //         let alias = key;
+    //         const aliasInput = this.aliases[key];
+    //         if(aliasInput) {
+    //           alias = aliasInput;
+    //         }
+
+
+    //         const agreggates = new Array<AggregateDescriptor>();
+    //         agreggates.push(<any>{ field: key, aggregate: <any>value, alias: alias });
+    //         group.aggregates = agreggates;
+    //       }
+    //     });
+
+
+    //     // if (this.aggregationSelects.has(nameAggreg)) {
+    //     //   let selectValue: any = this.aggregationSelects.get(nameAggreg);
+
+    //     //   const agreggates = new Array<AggregateDescriptor>();
+    //     //   const keys = this.metadata.columns.filter(c => c.key);
+    //     //   keys.forEach(key => {
+    //     //     agreggates.push({ field: key.name, aggregate: selectValue });
+    //     //   });
+    //     //   group.aggregates = agreggates;
+    //     // }
+    //   });
+
+
+
+    //   // groups.forEach(group => {
+    //   //   const agreggates = new Array<AggregateDescriptor>();
+    //   //   //Maybe should be abble to allow the user to specify the aggregate (PivotGrid?)
+    //   //   const keys = this.metadata.columns.filter(c => c.key);
+    //   //   // const key = keys[0];
+    //   //   // agreggates.push({ field: key.name, aggregate: 'count' });
+    //   //   keys.forEach(key => {
+    //   //     agreggates.push({ field: key.name, aggregate: 'count' });
+    //   //   });
+    //   //   group.aggregates = agreggates;
+    //   // });
+    // }
     this.groups = groups;
     //this.load();
   }
@@ -276,13 +300,19 @@ export class GridODataComponent implements OnInit {
         stateToQuery.filter = {
           logic: 'and',
           filters: new Array<FilterDescriptor | CompositeFilterDescriptor>()
-         };
-      }else{
+        };
+      } else {
         stateToQuery.filter.filters.shift();
       }
       //console.log(this.dataItem);
       for (let key in this.dataItem) {
-        if (!key.startsWith('@')) {
+        const hasArrow = key.indexOf('@') != -1;
+        const keys = Object.keys(this.dataItem);
+        const hasColumnWithArrow = keys.some(item => {
+          const startsWithKeyWithArrow = item.startsWith(key + '@');
+          return startsWithKeyWithArrow;
+        });
+        if ((!hasArrow) && (!hasColumnWithArrow)) {
           stateToQuery.filter.logic = 'and';
           const value = this.dataItem[key];
           const filterDescriptor: FilterDescriptor = {
