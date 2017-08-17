@@ -205,7 +205,7 @@ export class DashboardComponent implements OnInit {
             } else {
                 this.tableName = 'mains';
             }
-            this.updateGrid(table);
+            this.updateGrid(this.tableName);
         });
 
 
