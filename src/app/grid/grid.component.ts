@@ -277,6 +277,8 @@ export class GridODataComponent implements OnInit {
           logic: 'and',
           filters: new Array<FilterDescriptor | CompositeFilterDescriptor>()
          };
+      }else{
+        stateToQuery.filter.filters.shift();
       }
       //console.log(this.dataItem);
       for (let key in this.dataItem) {
@@ -288,7 +290,7 @@ export class GridODataComponent implements OnInit {
             operator: 'eq',
             value: value
           };
-          stateToQuery.filter.filters.push(filterDescriptor);
+          stateToQuery.filter.filters.unshift(filterDescriptor);
         }
       }
     }
