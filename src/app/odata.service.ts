@@ -31,11 +31,11 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
 
     const hasGroups = state.group.length > 0;
     if (hasGroups) {
-      let group = "";
+      let group = "(";
 
       state.group.forEach(groupDesc => {
         const field = groupDesc.field;
-        group += `(${field})`;
+        group += `${field},`;
         //TODO: Aggregates TEST
         if (groupDesc.aggregates && groupDesc.aggregates.length > 0) {
 
@@ -45,7 +45,7 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
             let operator: string = agreg.aggregate;
             const agregField = agreg.field;
 
-            if (operator == 'count') { operator = 'countdistinct' };
+            if (operator == 'count') { operator = 'countdistinct'; };
 
 
             if((<any>agreg).alias){
@@ -56,7 +56,7 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
 
             //group += `,aggregate(${agregField} with ${operator} as ${agregField})`;
 
-            
+
           });
           aggregate = aggregate.slice(0, -1);
 
@@ -64,8 +64,11 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
 
           group += "," + aggregateClause;
         }
+
         //aggregate(IdProcesso with countdistinct as IdProcesso)
       });
+      group = group.slice(0, -1);
+      group += ')';
 
       const groupClause = `&$apply=groupby(${group})`;
       uri += groupClause;

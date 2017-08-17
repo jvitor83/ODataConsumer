@@ -38,6 +38,7 @@ import { MenuItemComponent } from './shared/components/menu-item/menu-item.compo
 import { AUTH_SERVICE } from './shared/services/base-auth.service';
 import { httpFactory } from './shared/services/intercepted-http.service';
 import { AggregateModalComponent } from './grid/aggregate-modal/aggregate-modal.component';
+import { LayoutModule as KendoLayoutModule } from '@progress/kendo-angular-layout';
 
 
 @NgModule({
@@ -63,7 +64,8 @@ import { AggregateModalComponent } from './grid/aggregate-modal/aggregate-modal.
     // AngularFireAuthModule, //Keep this if you use Firebase, otherwise comment/remove it
 
     GridModule,
-    LayoutModule
+    LayoutModule,
+    KendoLayoutModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
