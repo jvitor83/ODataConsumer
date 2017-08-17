@@ -1,0 +1,29 @@
+<div *ngFor="let column of columns">
+  <ion-grid>
+    <ion-row>
+        <ion-col>
+          <ion-label>Aggregate</ion-label>
+        </ion-col>
+        <ion-col>
+          <ion-label>'{{column.name}}'</ion-label>
+        </ion-col>
+        <ion-col>
+          <ion-label>with:</ion-label>
+        </ion-col>
+        <ion-col>
+          <ion-select>
+            <ion-option [value]="'none'">None</ion-option>
+            <ion-option [value]="'countdistinct'">Count</ion-option>
+            <ion-option [value]="'sum'">Sum</ion-option>
+            <ion-option [value]="'max'">Max</ion-option>
+            <ion-option [value]="'min'">Min</ion-option>
+            <ion-option [value]="'average'">Average</ion-option>
+          </ion-select>
+        </ion-col>
+        <ion-col>
+          <ion-label>as:</ion-label>
+          <ion-input [value]="column.name" id="{{column.name}}Input"></ion-input>
+        </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>

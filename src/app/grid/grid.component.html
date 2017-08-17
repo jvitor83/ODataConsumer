@@ -50,7 +50,7 @@
           Hide
         </button>
       </ng-template>
-      <ng-template kendoGridFooterTemplate *ngIf="oDataVersion >= 4">
+      <!-- <ng-template kendoGridFooterTemplate *ngIf="oDataVersion >= 4">
         <ion-item>
           <ion-label>Aggregate</ion-label>
         </ion-item>
@@ -72,8 +72,17 @@
           <ion-label>as:</ion-label>
           <ion-input [value]="column.field" [(ngModel)]="aliases[column.field]" id="{{column.field}}Input"></ion-input>
         </ion-item>
-      </ng-template>
+      </ng-template> -->
     </kendo-grid-column>
+  </ng-template>
+
+  <ng-template kendoGridDetailTemplate let-dataItem [kendoGridDetailTemplateShowIf]="showDetailsOfGroupBy">
+    <seed-grid [tableName]="this.tableName" [url]="this.url" [dataItem]="dataItem">
+    </seed-grid>
+      <!-- <kendo-tabstrip>
+          <kendo-tabstrip-tab [title]="this.tableName" [selected]="true">
+          </kendo-tabstrip-tab>
+      </kendo-tabstrip> -->
   </ng-template>
 
   <!--<div *kendoGridDetailTemplate="let dataItem">

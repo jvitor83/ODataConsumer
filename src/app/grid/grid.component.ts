@@ -1,11 +1,12 @@
+import { AggregateModalComponent } from './aggregate-modal/aggregate-modal.component';
 import { state } from '@angular/animations';
 import { Http } from '@angular/http';
 import { ODataService } from './../odata.service';
 import { Observable } from 'rxjs/Observable';
-import { Component, OnInit, ViewChild, Input, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, QueryList, ViewChildren, ViewContainerRef, ApplicationRef } from '@angular/core';
 import { GridDataResult, PageChangeEvent, GridComponent, FooterTemplateDirective } from "@progress/kendo-angular-grid";
 import { SortDescriptor, State, FilterDescriptor, GroupDescriptor, CompositeFilterDescriptor, AggregateDescriptor } from "@progress/kendo-data-query";
-import { Select } from 'ionic-angular';
+import { Select, ModalController } from 'ionic-angular';
 import { Subject } from "rxjs/Subject";
 
 
@@ -15,6 +16,8 @@ import { Subject } from "rxjs/Subject";
   styleUrls: ['./grid.component.scss']
 })
 export class GridODataComponent implements OnInit {
+
+  @Input() public dataItem;
 
   @ViewChild(GridComponent) grid: GridComponent;
 
@@ -36,8 +39,10 @@ export class GridODataComponent implements OnInit {
 
   @ViewChildren(Select, { read: ViewContainerRef }) selects: QueryList<Select>;
 
-  constructor(private http: Http, private service: ODataService) {
+  private service: ODataService;
 
+  constructor(private http: Http, public modalCtrl: ModalController, private app: ApplicationRef) {
+    this.service = new ODataService(this.http);
     //const url = "http://localhost:8153/api.rsc";
     //"dbo_Usuario"
 
@@ -57,7 +62,7 @@ export class GridODataComponent implements OnInit {
     //   }
     // })
 
-    this.load();
+    //this.load();
 
     this.view.subscribe(r => {
       if (r) {
@@ -132,6 +137,9 @@ export class GridODataComponent implements OnInit {
   private aggregationSelects: Map<string, string> = new Map<string, string>();
   public aggregationChange(event, id) {
     this.aggregationSelects.set(id, event);
+
+
+
   }
 
 
@@ -141,8 +149,45 @@ export class GridODataComponent implements OnInit {
     this.aliasInputs.set(id, event);
   }
 
+  private hasKey(name: string, json: any) {
+
+  }
+
+  public showDetailsOfGroupBy(dataItem: any, index: number): boolean {
+
+    // TODO: The only way i found to check if are groupped is to see if dataItem has '@odata.id' property
+    // because the 'this' has another scope
+    let hasODataIdColumn = false;
+    if (dataItem) {
+      const keys = Object.keys(dataItem);
+      if (keys) {
+        const filter = keys.filter(k => k === '@odata.id');
+        if (filter) {
+          hasODataIdColumn = filter.length > 0;
+        }
+      }
+    }
+
+
+    if (hasODataIdColumn) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
   aggregationDummy: string;
   public groupChange(groups: GroupDescriptor[]): void {
+
+    // let columns = (this.metadata && this.metadata.columns) || this.columns;
+    // let modal = this.modalCtrl.create(AggregateModalComponent, columns);
+    // modal.onDidDismiss(data => {
+    //   console.log('--------');
+    // });
+    // modal.present();
+
+
     if (groups && groups.length > 0) {
       groups.forEach(group => {
 
@@ -196,7 +241,7 @@ export class GridODataComponent implements OnInit {
       // });
     }
     this.groups = groups;
-    this.load();
+    //this.load();
   }
   public filterChange(filter: CompositeFilterDescriptor): void {
     this.filter = filter;
@@ -226,14 +271,38 @@ export class GridODataComponent implements OnInit {
     }
 
 
-    if(!this.paginate){
+    if (this.dataItem) {
+      if (!stateToQuery.filter) {
+        stateToQuery.filter = {
+          logic: 'and',
+          filters: new Array<FilterDescriptor | CompositeFilterDescriptor>()
+         };
+      }
+      //console.log(this.dataItem);
+      for (let key in this.dataItem) {
+        if (!key.startsWith('@')) {
+          stateToQuery.filter.logic = 'and';
+          const value = this.dataItem[key];
+          const filterDescriptor: FilterDescriptor = {
+            field: key,
+            operator: 'eq',
+            value: value
+          };
+          stateToQuery.filter.filters.push(filterDescriptor);
+        }
+      }
+    }
+
+
+
+    if (!this.paginate) {
       delete stateToQuery.skip;
       delete stateToQuery.take;
     }
 
-    if(this.selectOnlyVisible && this.hiddenColumns.length > 0) {
+    if (this.selectOnlyVisible && this.hiddenColumns.length > 0) {
       let selects = new Array<string>();
-      
+
       let columnsToSelect = this.columns.map(c => c.field).filter(column => {
         const includes = this.hiddenColumns.indexOf(column) > -1;
         const notIncludes = !includes;
@@ -249,7 +318,7 @@ export class GridODataComponent implements OnInit {
     if ((!!this.url) && (!!this.tableName)) {
       this.service.query(stateToQuery, this.url, this.tableName, true, this.oDataVersion);
     }
-
+    this.app.tick();
   }
 
   public refresh() {

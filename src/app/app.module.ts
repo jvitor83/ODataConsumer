@@ -37,12 +37,15 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { MenuItemComponent } from './shared/components/menu-item/menu-item.component';
 import { AUTH_SERVICE } from './shared/services/base-auth.service';
 import { httpFactory } from './shared/services/intercepted-http.service';
+import { AggregateModalComponent } from './grid/aggregate-modal/aggregate-modal.component';
+import { LayoutModule as KendoLayoutModule } from '@progress/kendo-angular-layout';
 
 
 @NgModule({
   declarations: [
     MyApp,
-    MenuItemComponent
+    MenuItemComponent,
+    AggregateModalComponent
   ],
   imports: [
     HttpModule,
@@ -61,11 +64,13 @@ import { httpFactory } from './shared/services/intercepted-http.service';
     // AngularFireAuthModule, //Keep this if you use Firebase, otherwise comment/remove it
 
     GridModule,
-    LayoutModule
+    LayoutModule,
+    KendoLayoutModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp
+    MyApp,
+    AggregateModalComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: IonicErrorHandler },
