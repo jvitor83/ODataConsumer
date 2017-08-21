@@ -184,20 +184,24 @@ export class GridODataComponent implements OnInit {
       //groups.forEach(group => {
         const group = groups[groups.length - 1];
 
+
+        const agreggates = new Array<AggregateDescriptor>();
         let columns = (this.metadata && this.metadata.columns);// || this.columns;
         if (columns) {
           columns.forEach(c => {
             if (c.key) {
   
               
-              const agreggates = new Array<AggregateDescriptor>();
+              
               agreggates.push(<any>{ field: c.name, aggregate: <any>'count', alias: c.name});
-              group.aggregates = agreggates;
+              
   
   
             }
           })
         }
+
+        group.aggregates = agreggates;
 
 
       //});
@@ -314,7 +318,8 @@ export class GridODataComponent implements OnInit {
         });
         if ((!hasArrow) && (!hasColumnWithArrow)) {
           stateToQuery.filter.logic = 'and';
-          const value = this.dataItem[key];
+          let value = this.dataItem[key];
+          if(typeof value == 'string') { value = encodeURIComponent(value); }
           const filterDescriptor: FilterDescriptor = {
             field: key,
             operator: 'eq',
