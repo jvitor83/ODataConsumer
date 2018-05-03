@@ -1,10 +1,11 @@
+import { style } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { NavParams } from "ionic-angular";
 
 @Component({
   selector: 'seed-aggregate-modal',
   templateUrl: './aggregate-modal.component.html',
-  styleUrls: ['./aggregate-modal.component.scss']
+  styles: ['.aggregateModalContainer{ background-color: white; }']
 })
 export class AggregateModalComponent implements OnInit {
 

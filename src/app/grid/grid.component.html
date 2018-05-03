@@ -76,14 +76,25 @@
     </kendo-grid-column>
   </ng-template>
 
-  <ng-template kendoGridDetailTemplate let-dataItem [kendoGridDetailTemplateShowIf]="showDetailsOfGroupBy">
+  <ng-template kendoGridDetailTemplate let-dataItem [kendoGridDetailTemplateShowIf]="notShowDetailsOfGroupBy">
+      <kendo-tabstrip>
+
+          <kendo-tabstrip-tab *ngFor="let relation of this.relations; let i = index" [title]="relation.name" [selected]="i == 0">
+              <ng-template kendoTabContent>
+              <seed-grid [tableName]="relation.target" [parentRelation]="relation" [url]="this.url" [dataItem]="dataItem" [dataItemTableName]="this.tableName"
+              [fullMetadata]="this.fullMetadata" [metadata]="getMetadataFromTable(relation.name)">
+
+              </seed-grid>
+              </ng-template>
+          </kendo-tabstrip-tab>
+
+      </kendo-tabstrip>
+  </ng-template>
+
+  <!-- <ng-template kendoGridDetailTemplate let-dataItem [kendoGridDetailTemplateShowIf]="showDetailsOfGroupBy">
     <seed-grid [tableName]="this.tableName" [url]="this.url" [dataItem]="dataItem">
     </seed-grid>
-      <!-- <kendo-tabstrip>
-          <kendo-tabstrip-tab [title]="this.tableName" [selected]="true">
-          </kendo-tabstrip-tab>
-      </kendo-tabstrip> -->
-  </ng-template>
+  </ng-template> -->
 
   <!--<div *kendoGridDetailTemplate="let dataItem">
     <ng-content></ng-content>

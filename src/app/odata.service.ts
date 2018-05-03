@@ -12,8 +12,28 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
     super(null);
   }
 
-  private fetch(state: State, url: string, tableName: string, includeCount = true, version = 4): Observable<GridDataResult> {
-    const queryStr = `${toODataString(state)}`;
+  private insertAtString(original, index, string) {
+    if (index > 0) {
+      return original.substring(0, index) + string + original.substring(index, original.length);
+    } else {
+      return string + original;
+    }
+  }
+
+  private fetch(state: State, url: string, tableName: string,
+    includeCount = true, version = 4, additionalFilter = ''): Observable<GridDataResult> {
+    let queryStr = `${toODataString(state)}`;
+
+    if (additionalFilter) {
+      const stringFilter = '$filter=';
+      const indexOfFilter = queryStr.indexOf(stringFilter);
+      if (indexOfFilter !== -1) {
+        const indexToIncludeAdditionalFilters = indexOfFilter + stringFilter.length;
+        queryStr = this.insertAtString(queryStr, indexToIncludeAdditionalFilters, additionalFilter);
+      } else {
+        queryStr += '&$filter=' + additionalFilter;
+      }
+    }
 
     let uri = `${url}${tableName}?${queryStr}`;
 
@@ -50,12 +70,12 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
             if (operator == 'count') { operator = 'countdistinct'; };
 
 
-            if((<any>agreg).alias){
+            if ((<any>agreg).alias) {
               aggregate += `${agregField} with ${operator} as ` + (<any>agreg).alias + ",";
-            }else{
+            } else {
               aggregate += `${agregField} with ${operator} as ${agregField},`;
             }
-            
+
 
           });
           aggregate = aggregate.slice(0, -1);
@@ -67,7 +87,7 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
 
         //aggregate(IdProcesso with countdistinct as IdProcesso)
       });
-      
+
       group += ')';
 
       const groupClause = `&$apply=groupby${group}`;
@@ -75,7 +95,7 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
     }
 
 
-    if((<any>state).select && (!hasGroups)) {
+    if ((<any>state).select && (!hasGroups)) {
       let selectColumns = "";
       const selects: Array<string> = (<any>state).select;
       selects.forEach(col => {
@@ -124,8 +144,8 @@ export class ODataService extends BehaviorSubject<GridDataResult> {
       });
   }
 
-  public query(state: State, url: string, tableName: string, includeCount = true, version = 4): void {
-    this.fetch(state, url, tableName, includeCount, version)
+  public query(state: State, url: string, tableName: string, includeCount = true, version = 4, additionalFilter = ''): void {
+    this.fetch(state, url, tableName, includeCount, version, additionalFilter)
       .subscribe(x => super.next(x));
   }
 

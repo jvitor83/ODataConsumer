@@ -41,12 +41,12 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    metadata: Array<{ version: number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }>;
+    metadata: Array<{ version: number, type: string, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[], relations: Array<{ name: string, type: string, path: string, target: string }> }>;
 
     private getTables(url: string) {
         let ret: Observable<any> = null;
 
-        let retorno: Array<{ version: number, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[] }> = [];
+        let retorno: Array<{ version: number, type: string, name: string, columns: { name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }[], relations: Array<{ name: string, type: string, path: string, target: string }> }> = [];
 
         let format: 'xml' | 'json' = 'xml';
         if (format == 'xml') {
@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit {
                 let response = value.text();
                 let parser = new DOMParser();
 
-                const entidades = new Array<{ version: number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> }>();
+                const entidades = new Array<{ version: number, type: string, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }>, relations: Array<{ name: string, type: string, path: string, target: string }> }>();
 
                 let xmlDoc = parser.parseFromString(response, "text/xml");
                 let edmx = xmlDoc.getElementsByTagName("Edmx");
@@ -78,10 +78,12 @@ export class DashboardComponent implements OnInit {
 
                     let entitySet = entitySets[ia];
                     const name = entitySet.attributes["Name"].value;
-                    const entityTypeSplit: string[] = entitySet.attributes["EntityType"].value.split('.');
+                    const entityTypeNameMetadata = entitySet.attributes["EntityType"].value;
+                    const entityTypeSplit: string[] = entityTypeNameMetadata.split('.');
                     const entityTypeName = entityTypeSplit[entityTypeSplit.length - 1];
 
                     const colunas = new Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }>();
+                    const relacionamentos = new Array<{ name: string, type: string, path: string, target: string }>();
 
                     for (var ib = 0; ib < entityTypes.length; ib++) {
                         const entityType = entityTypes[ib];
@@ -90,6 +92,9 @@ export class DashboardComponent implements OnInit {
 
                             const keys = new Array<string>();
                             const columnsEntityType = entityType.getElementsByTagName("Property");
+                            //const relationsEntityType = entityType.getElementsByTagName("NavigationProperty");
+                            //const relationsEntityType = getRelationForType(name, entitySets);
+                            const relationsEntityType = entityType.getElementsByTagName("NavigationProperty");
                             const keysEntityType = entityType.getElementsByTagName("Key");
                             if (keysEntityType && keysEntityType.length > 0) {
                                 const keyEntityType = keysEntityType[0];
@@ -102,7 +107,9 @@ export class DashboardComponent implements OnInit {
                             }
 
 
-                            for (var id = 0; id < columnsEntityType.length; id++) {
+
+
+                            for (let id = 0; id < columnsEntityType.length; id++) {
                                 const columnEntityType = columnsEntityType[id];
 
                                 const columnEntityTypeName = columnEntityType.attributes["Name"].value;
@@ -123,14 +130,39 @@ export class DashboardComponent implements OnInit {
                             }
 
 
+                            for (let id = 0; id < relationsEntityType.length; id++) {
+                              const relationEntityType = relationsEntityType[id];
+                              const relationEntityTypeName = relationEntityType.attributes["Name"].value;
+                              const relationType = relationEntityType.attributes["Type"].value;
+
+                              let relationPath = '';
+                              let relationTarget = '';
+                              const elements = entitySet.getElementsByTagName('NavigationPropertyBinding');
+                              // tslint:disable-next-line:no-shadowed-variable
+                              for (let ia = 0, length = elements.length; ia < length; ia++) {
+                                const elemento = elements[ia];
+                                if (elemento.attributes['Path'].value === relationEntityTypeName) {
+                                  relationPath = elemento.attributes['Path'].value;
+                                  relationTarget = elemento.attributes['Target'].value;
+                                }
+                              }
+
+                              relacionamentos.push( { name: relationEntityTypeName, type: relationType, path: relationPath, target: relationTarget });
+                            }
+
+
                         }
                     }
 
 
-                    let item: { version: number, name: string, columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }> } = {
+                    let item: { version: number, type: string, name: string,
+                      columns: Array<{ name: string, type: 'numeric' | 'boolean' | 'text' | 'date', nullable?: boolean, key: boolean }>,
+                    relations: Array<{ name: string, type: string, path: string, target: string }> } = {
                         name: name,
+                        type: entityTypeNameMetadata,
                         columns: colunas,
-                        version: version
+                        relations: relacionamentos,
+                        version: version,
                     };
 
                     entidades.push(item);
@@ -165,6 +197,7 @@ export class DashboardComponent implements OnInit {
             this.tableName = value;
             this.grid.tableName = value;
             if (this.metadata) {
+              this.grid.fullMetadata = this.metadata;
                 const metadataTable = this.metadata.filter(m => m.name == value);
                 if (metadataTable && metadataTable.length > 0) {
                     this.grid.metadata = metadataTable[0];
