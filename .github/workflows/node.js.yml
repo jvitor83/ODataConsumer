@@ -26,4 +26,4 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build.prod.exp --if-present
-    - run: npm github.docs
+    - run: npm run github.docs
