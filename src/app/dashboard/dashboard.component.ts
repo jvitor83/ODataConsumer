@@ -206,6 +206,7 @@ export class DashboardComponent implements OnInit {
             this.grid.sort = [];
             this.grid.groups = [];
             this.grid.aggregations = [];
+            this.grid.restoreColumns();
 
             this.grid.refresh();
         }
