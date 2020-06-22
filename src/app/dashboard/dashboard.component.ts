@@ -194,6 +194,7 @@ export class DashboardComponent implements OnInit {
     updateGrid(value: string) {
         if (!!value) {
             localStorage.setItem('oDataTable', value);
+            this.grid.restoreColumns();
             this.tableName = value;
             this.grid.tableName = value;
             if (this.metadata) {
@@ -206,7 +207,7 @@ export class DashboardComponent implements OnInit {
             this.grid.sort = [];
             this.grid.groups = [];
             this.grid.aggregations = [];
-            this.grid.restoreColumns();
+            
 
             this.grid.refresh();
         }
