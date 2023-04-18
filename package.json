@@ -117,7 +117,7 @@
     "@progress/kendo-drawing": "^1.2.0",
     "@progress/kendo-theme-default": "^2.40.1",
     "bootstrap": "^3.3.7",
-    "browser-sync": "2.17.5",
+    "browser-sync": "2.29.1",
     "cheerio": "0.22.0",
     "core-js": "^2.4.1",
     "csp-parse": "0.0.2",
